@@ -12,6 +12,7 @@ class CLIArgumentsParser:
         )
         self.group = self.parser.add_mutually_exclusive_group()
         self.ports = tuple()
+        self.args = None
 
     def parse(self, *args, **kwargs) -> argparse.Namespace:
         self.parser.add_argument(
@@ -36,30 +37,28 @@ class CLIArgumentsParser:
                  "new line character '\\n', one port per line)",
         )
 
-        args = self.parser.parse_args(*args, **kwargs)
+        self.args = self.parser.parse_args(*args, **kwargs)
 
-        if args.all:
+        if self.args.all:
             ports = range(1, 65536)
-        elif args.ports:
-            ports = self.parse_ports(args.ports)
+        elif self.args.ports:
+            ports = self.parse_ports()
         else:
-            ports = self.read_from_file(args.file)
+            ports = self.read_from_file()
 
-        args.ports = tuple(ports)
+        self.args.ports = tuple(ports)
 
-        return args
+        return self.args
 
-    @staticmethod
-    def read_from_file(file: str) -> Iterator[int]:
+    def read_from_file(self) -> Iterator[int]:
         try:
-            with open(file, mode="r", encoding="utf_8") as f:
+            with open(self.args.file, mode="r", encoding="utf_8") as f:
                 yield from (int(line.strip()) for line in f)
         except FileNotFoundError:
-            raise SystemExit(f"Error reading from file {file}")
+            raise SystemExit(f"Error reading from file {self.args.file}")
 
-    @staticmethod
-    def parse_ports(ports: str) -> Iterator[int]:
-        yield from (int(port) for port in ports.split(","))
+    def parse_ports(self) -> Iterator[int]:
+        yield from (int(port) for port in self.args.ports.split(","))
 
 
 class PortScanner:
