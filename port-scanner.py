@@ -47,7 +47,7 @@ class CLIArgumentsParser:
 
         args.ports = tuple(ports)
 
-        return {"target": args.target, "ports": self.ports}
+        return args
 
     @staticmethod
     def read_from_file(file: str) -> Iterator[int]:
@@ -86,6 +86,6 @@ if __name__ == "__main__":
     cli_args = CLIArgumentsParser().parse()
 
     PortScanner(
-        target=cli_args["target"],
-        ports=cli_args["ports"],
+        target=cli_args.target,
+        ports=cli_args.ports,
     ).scan_ports()
