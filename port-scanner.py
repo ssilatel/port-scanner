@@ -37,12 +37,15 @@ class CLIArgumentsParser:
         )
 
         args = self.parser.parse_args(*args, **kwargs)
+
         if args.all:
-            self.ports = tuple(range(1, 65536))
+            ports = range(1, 65536)
         elif args.ports:
-            self.ports = tuple(self.parse_ports(args.ports))
+            ports = self.parse_ports(args.ports)
         else:
-            self.ports = tuple(self.read_from_file(args.file))
+            ports = self.read_from_file(args.file)
+
+        self.ports = tuple(ports)
 
         return {"target": args.target, "ports": self.ports}
 
