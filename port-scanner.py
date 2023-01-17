@@ -1,25 +1,40 @@
-#!/bin/python3
+#!/usr/bin/python3
 import argparse
 import socket
-import sys
+
 
 class CLIArgumentsParser:
     def __init__(self):
-        self.parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description="Scan any number of ports on a target machine")
-        self.parser.add_argument("-t", "--target", help="Target machine to scan")
-        self.p = self.parser.add_mutually_exclusive_group()
-        self.p.add_argument("-a", "--all", help="Scan all ports", action="store_true")
-        self.p.add_argument("-p", "--ports", help="Specify ports (separated by a comma if multiple)")
-        self.args = vars(self.parser.parse_args())
+        self.parser = argparse.ArgumentParser(
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            description="Scan any number of ports on a target machine",
+        )
+        self.parser.add_argument(
+            "target",
+            type=str,
+            help="Target machine to scan"
+        )
+        self.group = self.parser.add_mutually_exclusive_group()
 
-    def get_args(self):
-        return self.args
+    def parse(self, *args, **kwargs) -> argparse.Namespace:
+        self.group.add_argument(
+            "-a", "--all",
+            help="Scan all ports",
+            action="store_true"
+        )
+        self.group.add_argument(
+            "-p", "--ports",
+            type=str,
+            help="Specify ports (separated by a comma if multiple)"
+        )
+        return self.parser.parse_args(*args, **kwargs)
+
 
 class PortScanner:
-    def __init__(self, args):
-        self.target = args["target"]
-        self.all = args["all"]
-        self.ports = args["ports"]
+    def __init__(self, target: str, ports: str, all_ports: bool):
+        self.target = target
+        self.all_ports = all_ports
+        self.ports = ports
 
     def scan_all_ports(self):
         found_open_ports = False
@@ -56,7 +71,7 @@ class PortScanner:
         sock.close()
 
     def scan_ports(self):
-        if self.all:
+        if self.all_ports:
             self.scan_all_ports()
         else:
             if "," in self.ports:
@@ -64,7 +79,12 @@ class PortScanner:
             else:
                 self.scan_single_port()
 
+
 if __name__ == "__main__":
-    cliap = CLIArgumentsParser()
-    ps = PortScanner(cliap.get_args())
-    ps.scan_ports()
+    cli_args = CLIArgumentsParser().parse()
+
+    PortScanner(
+        target=cli_args.target,
+        ports=cli_args.ports,
+        all_ports=cli_args.all
+    ).scan_ports()
