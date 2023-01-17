@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import argparse
 import socket
+from typing import Iterator
 
 
 class CLIArgumentsParser:
@@ -39,8 +40,8 @@ class CLIArgumentsParser:
         if args.all:
             self.ports = tuple(range(1, 65536))
         elif args.ports:
-            self.parse_ports(args.ports)
-        elif args.file:
+            self.ports = tuple(self.parse_ports(args.ports))
+        else:
             self.read_from_file(args.file)
 
         return {"target": args.target, "ports": self.ports}
@@ -51,12 +52,9 @@ class CLIArgumentsParser:
                 line = line.strip()
                 self.ports.append(int(line))
 
-    def parse_ports(self, ports):
-        if "," in ports:
-            self.ports = ports.split(",")
-            self.ports = [ int(p) for p in self.ports ]
-        else:
-            self.ports.append(int(ports))
+    @staticmethod
+    def parse_ports(ports: str) -> Iterator[int]:
+        yield from (int(port) for port in ports.split(","))
 
 
 class PortScanner:
