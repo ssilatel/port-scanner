@@ -31,7 +31,7 @@ class CLIArgumentsParser:
         )
         self.group.add_argument(
             "-f", "--file",
-            type=argparse.FileType("r"),
+            type=str,
             help="Specify file containing ports (ports must be separated by a "
                  "new line character '\\n', one port per line)",
         )
@@ -42,15 +42,17 @@ class CLIArgumentsParser:
         elif args.ports:
             self.ports = tuple(self.parse_ports(args.ports))
         else:
-            self.read_from_file(args.file)
+            self.ports = tuple(self.read_from_file(args.file))
 
         return {"target": args.target, "ports": self.ports}
 
-    def read_from_file(self, file):
-        with file as f:
-            for line in file:
-                line = line.strip()
-                self.ports.append(int(line))
+    @staticmethod
+    def read_from_file(file: str) -> Iterator[int]:
+        try:
+            with open(file, mode="r", encoding="utf_8") as f:
+                yield from (int(line.strip()) for line in f)
+        except FileNotFoundError:
+            raise SystemExit(f"Error reading from file {file}")
 
     @staticmethod
     def parse_ports(ports: str) -> Iterator[int]:
