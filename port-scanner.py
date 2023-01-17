@@ -39,12 +39,10 @@ class CLIArgumentsParser:
 
         self.args = self.parser.parse_args(*args, **kwargs)
 
-        if self.args.all:
-            ports = range(1, 65536)
-        elif self.args.ports:
-            ports = self.parse_ports()
-        else:
+        if self.args.file:
             ports = self.read_from_file()
+        else:
+            ports = self.parse_ports()
 
         self.args.ports = tuple(ports)
 
@@ -58,7 +56,10 @@ class CLIArgumentsParser:
             raise SystemExit(f"Error reading from file {self.args.file}")
 
     def parse_ports(self) -> Iterator[int]:
-        yield from (int(port) for port in self.args.ports.split(","))
+        if self.args.all is True:
+            yield from range(1, 65536)
+        else:
+            yield from (int(port) for port in self.args.ports.split(","))
 
 
 class PortScanner:
