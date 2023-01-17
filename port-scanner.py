@@ -10,7 +10,7 @@ class CLIArgumentsParser:
             description="Scan any number of ports on a target machine",
         )
         self.group = self.parser.add_mutually_exclusive_group()
-        self.ports = []
+        self.ports = tuple()
 
     def parse(self, *args, **kwargs) -> argparse.Namespace:
         self.parser.add_argument(
@@ -37,8 +37,7 @@ class CLIArgumentsParser:
 
         args = self.parser.parse_args(*args, **kwargs)
         if args.all:
-            for i in range(1, 65536):
-                self.ports.append(i)
+            self.ports = tuple(range(1, 65536))
         elif args.ports:
             self.parse_ports(args.ports)
         elif args.file:
