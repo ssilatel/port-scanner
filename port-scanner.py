@@ -31,7 +31,8 @@ class CLIArgumentsParser:
         self.group.add_argument(
             "-f", "--file",
             type=argparse.FileType("r"),
-            help="Specify file containing ports (ports must be separated by a new line character '\\n', one port per line)",
+            help="Specify file containing ports (ports must be separated by a "
+                 "new line character '\\n', one port per line)",
         )
 
         args = self.parser.parse_args(*args, **kwargs)
