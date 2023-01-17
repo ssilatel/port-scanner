@@ -9,16 +9,15 @@ class CLIArgumentsParser:
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description="Scan any number of ports on a target machine",
         )
+        self.group = self.parser.add_mutually_exclusive_group()
+        self.ports = []
+
+    def parse(self, *args, **kwargs) -> argparse.Namespace:
         self.parser.add_argument(
             "target",
             type=str,
             help="Target machine to scan"
         )
-        self.group = self.parser.add_mutually_exclusive_group()
-        
-        self.ports = []
-
-    def parse(self, *args, **kwargs) -> argparse.Namespace:
         self.group.add_argument(
             "-a", "--all",
             help="Scan all ports",
