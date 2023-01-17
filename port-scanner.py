@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import argparse
 import socket
+from typing import Iterator
 
 
 class CLIArgumentsParser:
@@ -9,16 +10,16 @@ class CLIArgumentsParser:
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description="Scan any number of ports on a target machine",
         )
+        self.group = self.parser.add_mutually_exclusive_group()
+        self.ports = tuple()
+        self.args = None
+
+    def parse(self, *args, **kwargs) -> argparse.Namespace:
         self.parser.add_argument(
             "target",
             type=str,
             help="Target machine to scan"
         )
-        self.group = self.parser.add_mutually_exclusive_group()
-        
-        self.ports = []
-
-    def parse(self, *args, **kwargs) -> argparse.Namespace:
         self.group.add_argument(
             "-a", "--all",
             help="Scan all ports",
@@ -31,33 +32,34 @@ class CLIArgumentsParser:
         )
         self.group.add_argument(
             "-f", "--file",
-            type=argparse.FileType("r"),
-            help="Specify file containing ports (ports must be separated by a new line character '\\n', one port per line)",
+            type=str,
+            help="Specify file containing ports (ports must be separated by a "
+                 "new line character '\\n', one port per line)",
         )
 
-        args = self.parser.parse_args(*args, **kwargs)
-        if args.all:
-            for i in range(1, 65536):
-                self.ports.append(i)
-        elif args.ports:
-            self.parse_ports(args.ports)
-        elif args.file:
-            self.read_from_file(args.file)
+        self.args = self.parser.parse_args(*args, **kwargs)
 
-        return {"target": args.target, "ports": self.ports}
-
-    def read_from_file(self, file):
-        with file as f:
-            for line in file:
-                line = line.strip()
-                self.ports.append(int(line))
-
-    def parse_ports(self, ports):
-        if "," in ports:
-            self.ports = ports.split(",")
-            self.ports = [ int(p) for p in self.ports ]
+        if self.args.file:
+            ports = self.read_from_file()
         else:
-            self.ports.append(int(ports))
+            ports = self.parse_ports()
+
+        self.args.ports = tuple(ports)
+
+        return self.args
+
+    def read_from_file(self) -> Iterator[int]:
+        try:
+            with open(self.args.file, mode="r", encoding="utf_8") as f:
+                yield from (int(line.strip()) for line in f)
+        except FileNotFoundError:
+            raise SystemExit(f"Error reading from file {self.args.file}")
+
+    def parse_ports(self) -> Iterator[int]:
+        if self.args.all is True:
+            yield from range(1, 65536)
+        else:
+            yield from (int(port) for port in self.args.ports.split(","))
 
 
 class PortScanner:
@@ -84,6 +86,6 @@ if __name__ == "__main__":
     cli_args = CLIArgumentsParser().parse()
 
     PortScanner(
-        target=cli_args["target"],
-        ports=cli_args["ports"],
+        target=cli_args.target,
+        ports=cli_args.ports,
     ).scan_ports()
