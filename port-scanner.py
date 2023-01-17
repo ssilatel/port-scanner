@@ -45,7 +45,7 @@ class CLIArgumentsParser:
         else:
             ports = self.read_from_file(args.file)
 
-        self.ports = tuple(ports)
+        args.ports = tuple(ports)
 
         return {"target": args.target, "ports": self.ports}
 
