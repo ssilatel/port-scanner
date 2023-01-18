@@ -15,27 +15,23 @@ class CLIArgumentsParser:
         self.args = None
 
     def parse(self, *args, **kwargs) -> argparse.Namespace:
-        self.parser.add_argument(
-            "target",
-            type=str,
-            help="Target machine to scan"
+        self.parser.add_argument("target", type=str, help="Target machine to scan")
+        self.group.add_argument(
+            "-a", "--all", help="Scan all ports", action="store_true"
         )
         self.group.add_argument(
-            "-a", "--all",
-            help="Scan all ports",
-            action="store_true"
-        )
-        self.group.add_argument(
-            "-p", "--ports",
+            "-p",
+            "--ports",
             type=str,
             help="Specify ports (separated by a comma if multiple, or a range "
-                 "of ports separated by a dash \"-\")"
+            'of ports separated by a dash "-")',
         )
         self.group.add_argument(
-            "-f", "--file",
+            "-f",
+            "--file",
             type=str,
             help="Specify file containing ports (ports must be separated by a "
-                 "new line character '\\n', one port per line)"
+            "new line character '\\n', one port per line)",
         )
 
         self.args = self.parser.parse_args(*args, **kwargs)
