@@ -28,13 +28,14 @@ class CLIArgumentsParser:
         self.group.add_argument(
             "-p", "--ports",
             type=str,
-            help="Specify ports (separated by a comma if multiple)"
+            help="Specify ports (separated by a comma if multiple, or a range "
+                 "of ports separated by a dash \"-\")"
         )
         self.group.add_argument(
             "-f", "--file",
             type=str,
             help="Specify file containing ports (ports must be separated by a "
-                 "new line character '\\n', one port per line)",
+                 "new line character '\\n', one port per line)"
         )
 
         self.args = self.parser.parse_args(*args, **kwargs)
@@ -59,7 +60,11 @@ class CLIArgumentsParser:
         if self.args.all is True:
             yield from range(1, 65536)
         else:
-            yield from (int(port) for port in self.args.ports.split(","))
+            if "-" in self.args.ports:
+                port_range = self.args.ports.split("-")
+                yield from range(int(port_range[0]), int(port_range[1]) + 1)
+            else:
+                yield from (int(port) for port in self.args.ports.split(","))
 
 
 class PortScanner:
