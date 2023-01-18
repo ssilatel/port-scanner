@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import argparse
 import socket
-from typing import Iterator
+from collections.abc import Iterator
 
 
 class CLIArgumentsParser:
