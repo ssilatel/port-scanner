@@ -74,14 +74,20 @@ class PortScanner:
         print(f"Starting scan on {self.target}...\n")
         for p in self.ports:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                result = sock.connect_ex((self.target, p))
-                if result == 0:
+                try:
+                    sock.connect((self.target, p))
                     self.open_ports.append(p)
-        if len(self.open_ports) > 0:
-            for p in self.open_ports:
-                print(f"Port {p} is open")
-        else:
-            print("None of the specified ports are open")
+                except socket.gaierror:
+                    raise SystemExit(
+                        f"Failed to connect or resolve hostname to target "
+                        f"address {self.target}"
+                    )
+                except socket.timeout:
+                    print(f"Port {p} is closed or timed out")
+                except ConnectionRefusedError:
+                    print(f"Port {p} is closed or the server refused to connect")
+                else:
+                    print(f"Port {p} is open")
 
 
 if __name__ == "__main__":
