@@ -80,6 +80,7 @@ class PortScanner:
                 print(f"Port {p} on {self.target} is open")
         else:
             print(f"None of the specified ports are open on {self.target}")
+        sock.close()
 
 
 if __name__ == "__main__":
