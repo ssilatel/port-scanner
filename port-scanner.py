@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import argparse
 import socket
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator
 
 
 class CLIArgumentsParser:
@@ -69,7 +69,7 @@ class CLIArgumentsParser:
 
 
 class PortScanner:
-    def __init__(self, target: str, ports):
+    def __init__(self, target: str, ports: Collection[int]):
         self.target = target
         self.ports = ports
 
