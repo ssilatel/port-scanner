@@ -71,7 +71,7 @@ class PortScanner:
         self.open_ports = []
 
     def scan_ports(self):
-        print(f"Starting scan on {self.target}...\n")
+        print(f"Starting scan on {self.target}\n")
         for p in self.ports:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 try:
