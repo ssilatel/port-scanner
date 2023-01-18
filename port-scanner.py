@@ -60,11 +60,12 @@ class CLIArgumentsParser:
         if self.args.all is True:
             yield from range(1, 65536)
         else:
-            if "-" in self.args.ports:
-                port_range = self.args.ports.split("-")
-                yield from range(int(port_range[0]), int(port_range[1]) + 1)
-            else:
-                yield from (int(port) for port in self.args.ports.split(","))
+            for port in self.args.ports.split(","):
+                if "-" in port:
+                    start_port, end_port = port.split("-")
+                    yield from range(int(start_port), int(end_port) + 1)
+                else:
+                    yield int(port)
 
 
 class PortScanner:
@@ -73,7 +74,7 @@ class PortScanner:
         self.ports = ports
 
     def scan_ports(self):
-        print("Starting scan...\n")
+        print(f"Starting scan on {self.target}...\n")
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         open_ports = []
         for p in self.ports:
@@ -82,9 +83,9 @@ class PortScanner:
                 open_ports.append(p)
         if len(open_ports) > 0:
             for p in open_ports:
-                print(f"Port {p} on {self.target} is open")
+                print(f"Port {p} is open")
         else:
-            print(f"None of the specified ports are open on {self.target}")
+            print("None of the specified ports are open")
         sock.close()
 
 
