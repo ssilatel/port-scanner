@@ -69,6 +69,7 @@ class PortScanner:
         self.target = target
         self.ports = ports
         self.open_ports = []
+        self.port_states = {}
 
     def scan_ports(self):
         print(f"Starting scan on {self.target}\n")
@@ -84,11 +85,15 @@ class PortScanner:
                         f"address {self.target}"
                     )
                 except socket.timeout:
-                    print(f"Port {p} is closed or timed out")
+                    self.port_states[p] = "Closed | Timeout"
                 except ConnectionRefusedError:
-                    print(f"Port {p} is closed or the server refused to connect")
+                    self.port_states[p] = "Closed | ConnectionRefused"
                 else:
-                    print(f"Port {p} is open")
+                    self.port_states[p] = "Open"
+        for p in self.open_ports:
+            print(f"Port {p} is open\n")
+        for k, v in self.port_states.items():
+            print(f"{k} : {v}")
 
 
 if __name__ == "__main__":
