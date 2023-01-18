@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import argparse
 import socket
-from typing import Iterator
+from collections.abc import Iterator
 
 
 class CLIArgumentsParser:
@@ -28,13 +28,14 @@ class CLIArgumentsParser:
         self.group.add_argument(
             "-p", "--ports",
             type=str,
-            help="Specify ports (separated by a comma if multiple)"
+            help="Specify ports (separated by a comma if multiple, or a range "
+                 "of ports separated by a dash \"-\")"
         )
         self.group.add_argument(
             "-f", "--file",
             type=str,
             help="Specify file containing ports (ports must be separated by a "
-                 "new line character '\\n', one port per line)",
+                 "new line character '\\n', one port per line)"
         )
 
         self.args = self.parser.parse_args(*args, **kwargs)
@@ -59,7 +60,12 @@ class CLIArgumentsParser:
         if self.args.all is True:
             yield from range(1, 65536)
         else:
-            yield from (int(port) for port in self.args.ports.split(","))
+            for port in self.args.ports.split(","):
+                if "-" in port:
+                    start_port, end_port = port.split("-")
+                    yield from range(int(start_port), int(end_port) + 1)
+                else:
+                    yield int(port)
 
 
 class PortScanner:
@@ -68,18 +74,18 @@ class PortScanner:
         self.ports = ports
 
     def scan_ports(self):
-        print("Starting scan...\n")
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print(f"Starting scan on {self.target}...\n")
         open_ports = []
         for p in self.ports:
-            result = sock.connect_ex((self.target, p))
-            if result == 0:
-                open_ports.append(p)
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                result = sock.connect_ex((self.target, p))
+                if result == 0:
+                    open_ports.append(p)
         if len(open_ports) > 0:
             for p in open_ports:
-                print(f"Port {p} on {self.target} is open")
+                print(f"Port {p} is open")
         else:
-            print(f"None of the specified ports are open on {self.target}")
+            print("None of the specified ports are open")
 
 
 if __name__ == "__main__":
