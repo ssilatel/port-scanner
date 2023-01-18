@@ -75,17 +75,17 @@ class PortScanner:
 
     def scan_ports(self):
         print(f"Starting scan on {self.target}...\n")
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            open_ports = []
-            for p in self.ports:
+        open_ports = []
+        for p in self.ports:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 result = sock.connect_ex((self.target, p))
                 if result == 0:
                     open_ports.append(p)
-            if len(open_ports) > 0:
-                for p in open_ports:
-                    print(f"Port {p} is open")
-            else:
-                print("None of the specified ports are open")
+        if len(open_ports) > 0:
+            for p in open_ports:
+                print(f"Port {p} is open")
+        else:
+            print("None of the specified ports are open")
 
 
 if __name__ == "__main__":
