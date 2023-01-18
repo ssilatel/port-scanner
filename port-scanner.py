@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import argparse
 import socket
-from collections.abc import Iterator
+from collections.abc import Collection, Iterator
 
 
 class CLIArgumentsParser:
@@ -15,27 +15,23 @@ class CLIArgumentsParser:
         self.args = None
 
     def parse(self, *args, **kwargs) -> argparse.Namespace:
-        self.parser.add_argument(
-            "target",
-            type=str,
-            help="Target machine to scan"
+        self.parser.add_argument("target", type=str, help="Target machine to scan")
+        self.group.add_argument(
+            "-a", "--all", help="Scan all ports", action="store_true"
         )
         self.group.add_argument(
-            "-a", "--all",
-            help="Scan all ports",
-            action="store_true"
-        )
-        self.group.add_argument(
-            "-p", "--ports",
+            "-p",
+            "--ports",
             type=str,
             help="Specify ports (separated by a comma if multiple, or a range "
-                 "of ports separated by a dash \"-\")"
+            'of ports separated by a dash "-")',
         )
         self.group.add_argument(
-            "-f", "--file",
+            "-f",
+            "--file",
             type=str,
             help="Specify file containing ports (ports must be separated by a "
-                 "new line character '\\n', one port per line)"
+            "new line character '\\n', one port per line)",
         )
 
         self.args = self.parser.parse_args(*args, **kwargs)
@@ -69,23 +65,29 @@ class CLIArgumentsParser:
 
 
 class PortScanner:
-    def __init__(self, target: str, ports):
+    def __init__(self, target: str, ports: Collection[int]):
         self.target = target
         self.ports = ports
+        self.open_ports = []
 
     def scan_ports(self):
         print(f"Starting scan on {self.target}...\n")
-        open_ports = []
         for p in self.ports:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                result = sock.connect_ex((self.target, p))
-                if result == 0:
-                    open_ports.append(p)
-        if len(open_ports) > 0:
-            for p in open_ports:
-                print(f"Port {p} is open")
-        else:
-            print("None of the specified ports are open")
+                try:
+                    sock.connect((self.target, p))
+                    self.open_ports.append(p)
+                except socket.gaierror:
+                    raise SystemExit(
+                        f"Failed to connect or resolve hostname to target "
+                        f"address {self.target}"
+                    )
+                except socket.timeout:
+                    print(f"Port {p} is closed or timed out")
+                except ConnectionRefusedError:
+                    print(f"Port {p} is closed or the server refused to connect")
+                else:
+                    print(f"Port {p} is open")
 
 
 if __name__ == "__main__":
