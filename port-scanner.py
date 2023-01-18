@@ -75,6 +75,7 @@ class PortScanner:
         for p in self.ports:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 try:
+                    sock.settimeout(3)
                     sock.connect((self.target, p))
                     self.open_ports.append(p)
                 except socket.gaierror:
