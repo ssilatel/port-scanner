@@ -33,6 +33,13 @@ class CLIArgumentsParser:
             help="Specify file containing ports (ports must be separated by a "
             "new line character '\\n', one port per line)",
         )
+        self.parser.add_argument(
+            "-t",
+            "--timeout",
+            type=float,
+            help="Set socket timeout",
+            default=3.0
+        )
 
         self.args = self.parser.parse_args(*args, **kwargs)
 
@@ -65,9 +72,10 @@ class CLIArgumentsParser:
 
 
 class PortScanner:
-    def __init__(self, target: str, ports: Collection[int]):
+    def __init__(self, target: str, ports: Collection[int], timeout: float):
         self.target = target
         self.ports = ports
+        self.timeout = timeout
         self.open_ports = []
         self.port_states = {}
 
@@ -76,7 +84,7 @@ class PortScanner:
         for p in self.ports:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 try:
-                    sock.settimeout(3)
+                    sock.settimeout(self.timeout)
                     sock.connect((self.target, p))
                     self.open_ports.append(p)
                 except socket.gaierror:
@@ -102,4 +110,5 @@ if __name__ == "__main__":
     PortScanner(
         target=cli_args.target,
         ports=cli_args.ports,
+        timeout=cli_args.timeout
     ).scan_ports()
