@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+from abc import ABC, abstractmethod
 from collections.abc import Collection, Iterator
 from dataclasses import dataclass
 from enum import Enum
@@ -102,7 +103,6 @@ class PortScanner:
         self.port_states = []
 
     def scan_ports(self):
-        print(f"Starting scan on {self.target}\n")
         for p in self.ports:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
                 try:
@@ -125,17 +125,59 @@ class PortScanner:
 
         self.scan_results = ScanResults(self.port_states)
 
-    def print_results(self):
-        ports = self.scan_ports()
-        for p in ports:
-            print(p)
+
+class Command(ABC):
+    @abstractmethod
+    def execute(self) -> None:
+        pass
+
+
+class StartScan(Command):
+    def __init__(self, target):
+        self.port_scanner = port_scanner
+
+    def execute(self) -> None:
+        print(f"Starting scan on {self.port_scanner.target}\n")
+
+
+class FinishScan(Command):
+    def __init__(self, port_scanner):
+        self.port_scanner = port_scanner
+
+    def execute(self) -> None:
+        for port in self.port_scanner.scan_ports():
+            print(port)
+            
+
+class App:
+    def __init__(self):
+        self.on_start = None
+        self.on_finish = None
+
+    def set_on_start(self, command: Command):
+        self.on_start = command
+
+    def set_on_finish(self, command: Command):
+        self.on_finish = command
+
+    def scan(self) -> None:
+        if isinstance(self.on_start, Command):
+            self.on_start.execute()
+
+        if isinstance(self.on_finish, Command):
+            self.on_finish.execute()
 
 
 if __name__ == "__main__":
     cli_args = CLIArgumentsParser().parse()
 
-    PortScanner(
+    port_scanner = PortScanner(
         target=cli_args.target,
         ports=cli_args.ports,
         timeout=cli_args.timeout
-    ).print_results()
+    )
+
+    app = App()
+    app.set_on_start(StartScan(port_scanner))
+    app.set_on_finish(FinishScan(port_scanner))
+    app.scan()
