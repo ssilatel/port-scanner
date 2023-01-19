@@ -1,7 +1,10 @@
 #!/usr/bin/python3
+from collections.abc import Collection, Iterator
+from dataclasses import dataclass
+from enum import Enum
+from typing import List
 import argparse
 import socket
-from collections.abc import Collection, Iterator
 
 
 class CLIArgumentsParser:
@@ -71,13 +74,32 @@ class CLIArgumentsParser:
                     yield int(port)
 
 
+class PortStatus(Enum):
+    OPEN = "Open"
+    TIMEOUT = "Closed | Timeout"
+    CONN_REFUSED = "Closed | ConnectionRefused"
+
+
+@dataclass
+class Port:
+    number: int
+    status: str
+
+    def __str__(self):
+        return f"Port {self.number} : {self.status.value}"
+
+
+@dataclass
+class ScanResults:
+    ports: List[Port]
+
+
 class PortScanner:
     def __init__(self, target: str, ports: Collection[int], timeout: float):
         self.target = target
         self.ports = ports
         self.timeout = timeout
-        self.open_ports = []
-        self.port_states = {}
+        self.port_states = []
 
     def scan_ports(self):
         print(f"Starting scan on {self.target}\n")
@@ -86,22 +108,27 @@ class PortScanner:
                 try:
                     sock.settimeout(self.timeout)
                     sock.connect((self.target, p))
-                    self.open_ports.append(p)
                 except socket.gaierror:
                     raise SystemExit(
                         f"Failed to connect or resolve hostname to target "
                         f"address {self.target}"
                     )
                 except socket.timeout:
-                    self.port_states[p] = "Closed | Timeout"
+                    self.port_states.append(Port(p, PortStatus.TIMEOUT))
+                    yield Port(p, PortStatus.TIMEOUT)
                 except ConnectionRefusedError:
-                    self.port_states[p] = "Closed | ConnectionRefused"
+                    self.port_states.append(Port(p, PortStatus.CONN_REFUSED))
+                    yield Port(p, PortStatus.CONN_REFUSED)
                 else:
-                    self.port_states[p] = "Open"
-        for p in self.open_ports:
-            print(f"Port {p} is open\n")
-        for k, v in self.port_states.items():
-            print(f"{k} : {v}")
+                    self.port_states.append(Port(p, PortStatus.OPEN))
+                    yield Port(p, PortStatus.OPEN)
+
+        self.scan_results = ScanResults(self.port_states)
+
+    def print_results(self):
+        ports = self.scan_ports()
+        for p in ports:
+            print(p)
 
 
 if __name__ == "__main__":
@@ -111,4 +138,4 @@ if __name__ == "__main__":
         target=cli_args.target,
         ports=cli_args.ports,
         timeout=cli_args.timeout
-    ).scan_ports()
+    ).print_results()
