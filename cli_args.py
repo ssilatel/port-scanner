@@ -37,6 +37,12 @@ class CLIArgumentsParser:
             help="Set socket timeout",
             default=3.0
         )
+        self.parser.add_argument(
+            "-o",
+            "--output",
+            type=str,
+            help="Save the output to the specified filepath"
+        )
 
         self.args = self.parser.parse_args(*args, **kwargs)
 
