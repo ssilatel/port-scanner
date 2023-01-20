@@ -1,11 +1,5 @@
-#!/usr/bin/python3
-from collections.abc import Collection, Iterator
-from dataclasses import dataclass
-from enum import Enum
-from typing import List
+from collections.abc import Iterator
 import argparse
-import socket
-
 
 class CLIArgumentsParser:
     def __init__(self):
@@ -72,77 +66,3 @@ class CLIArgumentsParser:
                     yield from range(int(start_port), int(end_port) + 1)
                 else:
                     yield int(port)
-
-
-class PortStatus(Enum):
-    OPEN = "Open"
-    TIMEOUT = "Closed | Timeout"
-    CONN_REFUSED = "Closed | ConnectionRefused"
-
-
-@dataclass
-class Port:
-    number: int
-    status: str
-
-    def __str__(self):
-        return f"Port {self.number} : {self.status.value}"
-
-
-@dataclass
-class ScanResults:
-    ports: List[Port]
-
-
-class PortScanner:
-    def __init__(self, target: str, ports: Collection[int], timeout: float):
-        self.target = target
-        self.ports = ports
-        self.timeout = timeout
-        self.port_states = []
-
-    def scan_ports(self):
-        for p in self.ports:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                try:
-                    sock.settimeout(self.timeout)
-                    sock.connect((self.target, p))
-                except socket.gaierror:
-                    raise SystemExit(
-                        f"Failed to connect or resolve hostname to target "
-                        f"address {self.target}"
-                    )
-                except socket.timeout:
-                    self.port_states.append(Port(p, PortStatus.TIMEOUT))
-                    yield Port(p, PortStatus.TIMEOUT)
-                except ConnectionRefusedError:
-                    self.port_states.append(Port(p, PortStatus.CONN_REFUSED))
-                    yield Port(p, PortStatus.CONN_REFUSED)
-                else:
-                    self.port_states.append(Port(p, PortStatus.OPEN))
-                    yield Port(p, PortStatus.OPEN)
-
-        self.scan_results = ScanResults(self.port_states)
-
-
-class App:
-    def __init__(self, port_scanner):
-        self.port_scanner = port_scanner
-
-    def scan(self):
-        print(f"Starting scan on {self.port_scanner.target}\n")
-        for port in self.port_scanner.scan_ports():
-            print(port)
-
-
-if __name__ == "__main__":
-    cli_args = CLIArgumentsParser().parse()
-
-    port_scanner = PortScanner(
-        target=cli_args.target,
-        ports=cli_args.ports,
-        timeout=cli_args.timeout
-    )
-
-    app = App(port_scanner)
-    app.scan()
