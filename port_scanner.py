@@ -30,7 +30,7 @@ class PortScanner:
         self.target = target
         self.ports = ports
         self.timeout = timeout
-        self.port_states = []
+        self.scan_results = ScanResults([])
 
     def scan_ports(self):
         for p in self.ports:
@@ -44,13 +44,11 @@ class PortScanner:
                         f"address {self.target}"
                     )
                 except socket.timeout:
-                    self.port_states.append(Port(p, PortStatus.TIMEOUT))
+                    self.scan_results.ports.append(Port(p, PortStatus.TIMEOUT))
                     yield Port(p, PortStatus.TIMEOUT)
                 except ConnectionRefusedError:
-                    self.port_states.append(Port(p, PortStatus.CONN_REFUSED))
+                    self.scan_results.ports.append(Port(p, PortStatus.CONN_REFUSED))
                     yield Port(p, PortStatus.CONN_REFUSED)
                 else:
-                    self.port_states.append(Port(p, PortStatus.OPEN))
+                    self.scan_results.ports.append(Port(p, PortStatus.OPEN))
                     yield Port(p, PortStatus.OPEN)
-
-        self.scan_results = ScanResults(self.port_states)
