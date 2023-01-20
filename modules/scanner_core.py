@@ -26,11 +26,26 @@ class ScanResults:
 
 
 class PortScanner:
-    def __init__(self, target: str, ports: Collection[int], timeout: float):
+    def __init__(
+            self,
+            target: str,
+            ports: Collection[int],
+            timeout: float,
+            output_file: str
+        ):
         self.target = target
         self.ports = ports
         self.timeout = timeout
+        self.output_file = output_file
         self.scan_results = ScanResults([])
+        self.observers = []
+
+    def attach(self, observer):
+        self.observers.append(observer)
+
+    def notify(self):
+        for observer in self.observers:
+            observer.update()
 
     def scan_ports(self):
         for p in self.ports:
@@ -45,10 +60,10 @@ class PortScanner:
                     )
                 except socket.timeout:
                     self.scan_results.ports.append(Port(p, PortStatus.TIMEOUT))
-                    yield Port(p, PortStatus.TIMEOUT)
+                    self.notify()
                 except ConnectionRefusedError:
                     self.scan_results.ports.append(Port(p, PortStatus.CONN_REFUSED))
-                    yield Port(p, PortStatus.CONN_REFUSED)
+                    self.notify()
                 else:
                     self.scan_results.ports.append(Port(p, PortStatus.OPEN))
-                    yield Port(p, PortStatus.OPEN)
+                    self.notify()

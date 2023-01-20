@@ -41,7 +41,8 @@ class CLIArgumentsParser:
             "-o",
             "--output",
             type=str,
-            help="Save the output to the specified filepath"
+            help="Save the output to the specified filepath",
+            default=""
         )
 
         self.args = self.parser.parse_args(*args, **kwargs)

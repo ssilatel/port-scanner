@@ -1,6 +1,7 @@
 #!/usr/bin/python3
-from cli_args import CLIArgumentsParser
-from port_scanner import PortScanner
+from modules.cli_args import CLIArgumentsParser
+from modules.scanner_core import PortScanner
+from modules.output import ScreenOutput, FileOutput
 
 class App:
     def __init__(self):
@@ -8,22 +9,16 @@ class App:
         self.port_scanner = PortScanner(
                     target=self.cli_args.target,
                     ports=self.cli_args.ports,
-                    timeout=self.cli_args.timeout
+                    timeout=self.cli_args.timeout,
+                    output_file=self.cli_args.output
                 )
-        self.output_file = self.cli_args.output if self.cli_args.output else None
+        self.screen_output = ScreenOutput(self.port_scanner)
+        if self.cli_args.output:
+            self.file_output = FileOutput(self.port_scanner)
 
-    def scan(self):
-        print(f"Starting scan on {self.port_scanner.target}\n")
-        if self.output_file:
-            with open(self.output_file, mode="w", encoding="utf-8") as f:
-                for port in self.port_scanner.scan_ports():
-                    f.write(f"{str(port)}\n")
-                    print(port)
-        else:
-            for port in self.port_scanner.scan_ports():
-                print(port)
-            
+    def run(self):
+        self.port_scanner.scan_ports()
 
 
 if __name__ == "__main__":
-    App().scan()
+    App().run()
