@@ -1,6 +1,0 @@
-Port 20 : Closed | ConnectionRefused
-Port 21 : Closed | ConnectionRefused
-Port 22 : Closed | ConnectionRefused
-Port 23 : Closed | ConnectionRefused
-Port 24 : Closed | ConnectionRefused
-Port 25 : Closed | ConnectionRefused
