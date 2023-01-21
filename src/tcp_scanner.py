@@ -3,7 +3,7 @@ from src.types import PortStatus, Port, ScanResults
 import socket
 
 
-class PortScanner:
+class TCPScanner:
     def __init__(
             self,
             target: str,
