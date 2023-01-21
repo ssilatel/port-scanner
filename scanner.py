@@ -1,7 +1,7 @@
 #!/usr/bin/python3
-from modules.cli_args import CLIArgumentsParser
-from modules.scanner_core import PortScanner
-from modules.output import ScreenOutput, FileOutput
+from src.cli_args import CLIArgumentsParser
+from src.scanner_core import PortScanner
+from src.output import ScreenOutput, FileOutput
 
 class App:
     def __init__(self):

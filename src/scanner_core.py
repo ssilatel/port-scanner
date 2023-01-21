@@ -1,28 +1,6 @@
 from collections.abc import Collection
-from dataclasses import dataclass
-from enum import Enum
-from typing import List
+from src.types import PortStatus, Port, ScanResults
 import socket
-
-
-class PortStatus(Enum):
-    OPEN = "Open"
-    TIMEOUT = "Closed | Timeout"
-    CONN_REFUSED = "Closed | ConnectionRefused"
-
-
-@dataclass
-class Port:
-    number: int
-    status: str
-
-    def __str__(self):
-        return f"Port {self.number} : {self.status.value}"
-
-
-@dataclass
-class ScanResults:
-    ports: List[Port]
 
 
 class PortScanner:
@@ -46,7 +24,7 @@ class PortScanner:
     def notify(self):
         for observer in self.observers:
             observer.update()
-
+    
     def scan_ports(self):
         for p in self.ports:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
