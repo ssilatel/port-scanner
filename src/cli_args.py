@@ -51,6 +51,12 @@ class CLIArgumentsParser:
             help="Specify number of threads (default=10)",
             default=10
         )
+        self.parser.add_argument(
+            "-s",
+            "--show-states",
+            action="store_true",
+            help="Show all port states (only open ports will be shown by default)"
+        )
 
         self.args = self.parser.parse_args(*args, **kwargs)
 

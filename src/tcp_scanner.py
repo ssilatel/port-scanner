@@ -45,6 +45,12 @@ class TCPScanner:
             else:
                 return Port(port, PortStatus.OPEN)
 
+    def contains_open_ports(self):
+        for p in self.scan_results.ports:
+            if p.status == PortStatus.OPEN:
+                return True
+        return False
+
     def scan_ports(self):
         with ThreadPoolExecutor(max_workers=self.threads) as executor:
             try:
@@ -53,3 +59,9 @@ class TCPScanner:
                     self.notify(result)
             except KeyboardInterrupt:
                 print("\n[-] Scan ended by user input")
+
+        if not self.contains_open_ports():
+            print(f"[-] No open ports were found on {self.target}")
+            if self.output_file:
+                with open(self.output_file, mode="a", encoding="utf-8") as f:
+                    f.write(f"[-] No open ports were found on {self.target}")

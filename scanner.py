@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from src.cli_args import CLIArgumentsParser
 from src.tcp_scanner import TCPScanner
-from src.output import ScreenOutput, FileOutput
+from src.output import *
 
 class App:
     def __init__(self):
@@ -13,9 +13,14 @@ class App:
                     output_file=self.cli_args.output,
                     threads=self.cli_args.max_threads
                 )
-        self.screen_output = ScreenOutput(self.tcp_scanner)
-        if self.cli_args.output:
-            self.file_output = FileOutput(self.tcp_scanner)
+        if self.cli_args.show_states:
+            self.screen_output = AllPortsScreenOutput(self.tcp_scanner)
+            if self.cli_args.output:
+                self.file_output = AllPortsFileOutput(self.tcp_scanner)
+        else:
+            self.screen_output = OpenPortsScreenOutput(self.tcp_scanner)
+            if self.cli_args.output:
+                self.file_output = OpenPortsFileOutput(self.tcp_scanner)
 
     def run(self):
         try:
