@@ -10,12 +10,14 @@ class TCPScanner:
             target: str,
             ports: Collection[int],
             timeout: float,
-            output_file: str
+            output_file: str,
+            threads: int
         ):
         self.target = target
         self.ports = ports
         self.timeout = timeout
         self.output_file = output_file
+        self.threads = threads
         self.scan_results = ScanResults([])
         self.observers = []
 
@@ -44,7 +46,7 @@ class TCPScanner:
                 return Port(port, PortStatus.OPEN)
 
     def scan_ports(self):
-        with ThreadPoolExecutor(max_workers=10) as executor:
+        with ThreadPoolExecutor(max_workers=self.threads) as executor:
             try:
                 for result in executor.map(self.scan_single_port, self.ports):
                     self.scan_results.ports.append(result)

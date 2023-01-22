@@ -10,7 +10,8 @@ class App:
                     target=self.cli_args.target,
                     ports=self.cli_args.ports,
                     timeout=self.cli_args.timeout,
-                    output_file=self.cli_args.output
+                    output_file=self.cli_args.output,
+                    threads=self.cli_args.max_threads
                 )
         self.screen_output = ScreenOutput(self.tcp_scanner)
         if self.cli_args.output:

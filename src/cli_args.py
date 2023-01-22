@@ -34,7 +34,7 @@ class CLIArgumentsParser:
             "-t",
             "--timeout",
             type=float,
-            help="Set socket timeout",
+            help="Set socket timeout (default=3.0)",
             default=3.0
         )
         self.parser.add_argument(
@@ -43,6 +43,13 @@ class CLIArgumentsParser:
             type=str,
             help="Save the output to the specified filepath",
             default=""
+        )
+        self.parser.add_argument(
+            "-m",
+            "--max-threads",
+            type=int,
+            help="Specify number of threads (default=10)",
+            default=10
         )
 
         self.args = self.parser.parse_args(*args, **kwargs)
