@@ -39,7 +39,7 @@ class TCPScanner:
                     f"address {self.target}"
                 )
             except socket.timeout:
-                return Port(port, PortStatus.Timeout) 
+                return Port(port, PortStatus.TIMEOUT) 
             except ConnectionRefusedError:
                 return Port(port, PortStatus.CONN_REFUSED)
             else:
