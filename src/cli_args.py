@@ -14,7 +14,7 @@ class CLIArgumentsParser:
     def parse(self, *args, **kwargs) -> argparse.Namespace:
         self.parser.add_argument("target", type=str, help="Target machine to scan")
         self.group.add_argument(
-            "-a", "--all", help="Scan all ports", action="store_true"
+            "-a", "--all-ports", help="Scan all ports", action="store_true"
         )
         self.group.add_argument(
             "-p",
@@ -77,7 +77,7 @@ class CLIArgumentsParser:
             raise SystemExit(f"Error reading from file {self.args.file}")
 
     def parse_ports(self) -> Iterator[int]:
-        if self.args.all is True:
+        if self.args.all_ports:
             yield from range(1, 65536)
         else:
             for port in self.args.ports.split(","):
