@@ -1,5 +1,5 @@
 from collections.abc import Collection
-from concurrent.futures import as_completed, ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 from src.types import PortStatus, Port, ScanResults
 import socket
 

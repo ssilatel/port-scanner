@@ -31,7 +31,7 @@ class CLIArgumentsParser:
             "new line character '\\n', one port per line)",
         )
         self.parser.add_argument(
-            "-t",
+            "-T",
             "--timeout",
             type=float,
             help="Set socket timeout (default=3.0)",
@@ -45,15 +45,15 @@ class CLIArgumentsParser:
             default=""
         )
         self.parser.add_argument(
-            "-m",
-            "--max-threads",
+            "-t",
+            "--threads",
             type=int,
             help="Specify number of threads (default=10)",
             default=10
         )
         self.parser.add_argument(
-            "-s",
-            "--show-states",
+            "-v",
+            "--verbose",
             action="store_true",
             help="Show all port states (only open ports will be shown by default)"
         )

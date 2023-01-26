@@ -11,9 +11,9 @@ class App:
                     ports=self.cli_args.ports,
                     timeout=self.cli_args.timeout,
                     output_file=self.cli_args.output,
-                    threads=self.cli_args.max_threads
+                    threads=self.cli_args.threads
                 )
-        if self.cli_args.show_states:
+        if self.cli_args.verbose:
             self.screen_output = AllPortsScreenOutput(self.tcp_scanner)
             if self.cli_args.output:
                 self.file_output = AllPortsFileOutput(self.tcp_scanner)

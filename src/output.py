@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from src.cli_args import CLIArgumentsParser
 from src.types import PortStatus
 
 class Output(ABC):
